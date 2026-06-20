@@ -9,7 +9,7 @@ class MyLinearRegression:
         self.m = 0
         self.c = 0
         self.lr = learning_rate
-        
+    
     def fit(self, X, y, epochs=1000):
         n = len(X) 
         for _ in range(epochs):
@@ -50,6 +50,8 @@ interface = gr.Interface(
     title="Cab Price Predictor - Core AI Engine",
     description="Engine Built from Scratch without Sklearn."
 )
-
+# ---------------------------------------------------------
+# BLOCK 4: Launch the Gradio Interface
+# ---------------------------------------------------------
 if __name__ == "__main__":
     interface.launch()
