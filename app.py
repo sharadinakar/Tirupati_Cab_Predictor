@@ -1,60 +1,86 @@
 import numpy as np
+import pandas as pd
 import gradio as gr
 
 # ---------------------------------------------------------
-# BLOCK 1: The Core Engine (MATHS & ALGORITHMS)
+# BLOCK 1: The Core MULTI-LINEAR logic (Model Definition)
 # ---------------------------------------------------------
 class MyLinearRegression:
-    def __init__(self, learning_rate=0.01):
-        self.m = 0
-        self.c = 0
+    def __init__(self, learning_rate=0.001): # కొత్త డేటా కాబట్టి లెర్నింగ్ రేట్ తగ్గించాం
+        self.weights = None # మన w1, w2, w3 ఇక్కడే స్టోర్ అవుతాయి
+        self.c = 0          # ఇంటర్సెప్ట్ (Base fare)
         self.lr = learning_rate
     
     def fit(self, X, y, epochs=1000):
-        n = len(X) 
+        n_samples, n_features = X.shape 
+        self.weights = np.zeros(n_features) # 3 ఫీచర్స్ కాబట్టి 3 సున్నాలతో స్టార్ట్ అవుతుంది
+        
         for _ in range(epochs):
-            y_pred = self.m * X + self.c
-            D_m = (-2/n) * np.sum(X * (y - y_pred))
-            D_c = (-2/n) * np.sum(y - y_pred)
-            self.m = self.m - (self.lr * D_m)
+            # np.dot అనేది (w1*x1 + w2*x2 + w3*x3) ని ఒకేసారి చేసే మ్యాజిక్ షార్ట్ కట్
+            y_pred = np.dot(X, self.weights) + self.c
+            
+            # ఇవి డెరివేటివ్స్ (తప్పును కనిపెట్టే కొలతలు)
+            D_w = (-2/n_samples) * np.dot(X.T, (y - y_pred))
+            D_c = (-2/n_samples) * np.sum(y - y_pred)
+            
+            # వెయిట్స్ ని అప్డేట్ చేయడం (తప్పు సరిదిద్దుకోవడం)
+            self.weights = self.weights - (self.lr * D_w)
             self.c = self.c - (self.lr * D_c)
             
     def predict(self, X_new):
-        return self.m * X_new + self.c
+        return np.dot(X_new, self.weights) + self.c
 
 # ---------------------------------------------------------
-# BLOCK 2: Data & Training (Data Preparation and Model Training)
+# BLOCK 2: Data Loading & Train-Test Split
 # ---------------------------------------------------------
+print("Loading data from tirupati_cab_data.csv...")
 
-X = np.array([2, 4, 5, 8, 10]) 
-y = np.array([50, 200, 250, 400,500])
+# 1. డేటాని చదవడం
+df = pd.read_csv("tirupati_cab_data.csv")
 
+# 2. X మరియు y ని విడగొట్టడం
+X_data = df[['Distance_KM', 'Traffic_Level', 'Weather_Rainy']].values
+y_data = df['Cab_Price_INR'].values
 
-# -------------------------------------------------------------
-# Training the model using the custom linear regression implementation.
-#  This is where the core AI engine learns the relationship between distance and cab price based on the provided data.
-# -------------------------------------------------------------
+# 3. Train-Test Split (80% Training, 20% Testing)
+split_index = int(0.8 * len(df))
 
-model = MyLinearRegression()
-model.fit(X, y)
+X_train = X_data[:split_index]
+y_train = y_data[:split_index]
+
+X_test = X_data[split_index:]
+y_test = y_data[split_index:]
+
+# 4. మోడల్ ని ట్రైన్ చేయడం (కేవలం 80% డేటా తోనే)
+print("Training the Multi-Linear AI Engine...")
+model = MyLinearRegression(learning_rate=0.001)
+model.fit(X_train, y_train, epochs=2000)
+
+print(f"Engine Trained! \nFound Weights: {model.weights} \nBase Fare (c): {model.c}")
 
 # ---------------------------------------------------------
-# BLOCK 3: The Front-End UI (Customer-facing Web App)
+# BLOCK 3 & 4: The Front-End UI (Using Gradio Blocks for a clean layout)
 # ---------------------------------------------------------
-def get_cab_price(distance):
-    price = model.predict(distance) 
+def get_cab_price(distance, traffic, weather):
+    input_features = np.array([distance, traffic, weather])
+    price = model.predict(input_features) 
     return f"₹ {round(price, 2)}"
 
+# gr.Blocks వాడితే లేఅవుట్ మన కంట్రోల్ లో ఉంటుంది
+with gr.Blocks(theme=gr.themes.Soft()) as interface:
+    gr.Markdown("# 🚖 Tirupati Cab Price Predictor")
+    gr.Markdown("### Core AI Engine: Multi-Linear Regression")
+    
+    with gr.Row(): # ఈ మూడు పక్కపక్కన వస్తాయి
+        dist_input = gr.Slider(minimum=1, maximum=50, value=5, label="Distance (in KM)")
+        traf_input = gr.Slider(minimum=1, maximum=5, step=1, value=1, label="Traffic Level (1=Free, 5=Jam)")
+        weat_input = gr.Dropdown(choices=[0, 1], value=0, label="Weather (0=Clear, 1=Rain)")
+        
+    predict_btn = gr.Button("Calculate Price 🚀", variant="primary")
+    output_price = gr.Text(label="Predicted Cab Price")
+    
+    # బటన్ నొక్కినప్పుడు ఫంక్షన్ రన్ అవుతుంది
+    predict_btn.click(fn=get_cab_price, inputs=[dist_input, traf_input, weat_input], outputs=output_price)
 
-interface = gr.Interface(
-    fn=get_cab_price, 
-    inputs=gr.Slider(minimum=1, maximum=50, label="Distance (in KM)"), 
-    outputs=gr.Text(label="Predicted Cab Price"),
-    title="Cab Price Predictor - Core AI Engine",
-    description="Engine Built from Scratch without Sklearn."
-)
-# ---------------------------------------------------------
-# BLOCK 4: Launch the Gradio Interface
-# ---------------------------------------------------------
 if __name__ == "__main__":
     interface.launch()
