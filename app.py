@@ -54,7 +54,7 @@ y_test = y_data[split_index:]
 # 4. మోడల్ ని ట్రైన్ చేయడం (కేవలం 80% డేటా తోనే)
 print("Training the Multi-Linear AI Engine...")
 model = MyLinearRegression(learning_rate=0.001)
-model.fit(X_train, y_train, epochs=2000)
+model.fit(X_train, y_train, epochs=20000)
 
 print(f"Engine Trained! \nFound Weights: {model.weights} \nBase Fare (c): {model.c}")
 
