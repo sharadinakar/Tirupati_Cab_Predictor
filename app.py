@@ -30,10 +30,13 @@ X = np.array([2, 4, 5, 8, 10])
 y = np.array([50, 200, 250, 400,500])
 
 
-
+# -------------------------------------------------------------
+# Training the model using the custom linear regression implementation.
+#  This is where the core AI engine learns the relationship between distance and cab price based on the provided data.
+# -------------------------------------------------------------
 
 model = MyLinearRegression()
-model.fit(X, y, epochs=1000)
+model.fit(X, y)
 
 # ---------------------------------------------------------
 # BLOCK 3: The Front-End UI (Customer-facing Web App)
