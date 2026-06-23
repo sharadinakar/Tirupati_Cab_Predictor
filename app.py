@@ -6,14 +6,17 @@ import gradio as gr
 # BLOCK 1: The Core MULTI-LINEAR logic (Model Definition)
 # ---------------------------------------------------------
 class MyLinearRegression:
-    def __init__(self, learning_rate=0.001): # కొత్త డేటా కాబట్టి లెర్నింగ్ రేట్ తగ్గించాం
-        self.weights = None # మన w1, w2, w3 ఇక్కడే స్టోర్ అవుతాయి
-        self.c = 0          # ఇంటర్సెప్ట్ (Base fare)
+     # new data, so we reduced learning rate to make sure we don't overshoot the optimal weights
+    def __init__(self, learning_rate=0.001):
+        # stores the importance of each feature (distance, traffic, weather) called as weights
+        self.weights = None 
+        # intercept (Base fare)
+        self.c = 0         
         self.lr = learning_rate
     
     def fit(self, X, y, epochs=1000):
         n_samples, n_features = X.shape 
-        self.weights = np.zeros(n_features) # 3 ఫీచర్స్ కాబట్టి 3 సున్నాలతో స్టార్ట్ అవుతుంది
+        self.weights = np.zeros(n_features) # 3 features so 3 zeros to start with
         
         for _ in range(epochs):
             # np.dot అనేది (w1*x1 + w2*x2 + w3*x3) ని ఒకేసారి చేసే మ్యాజిక్ షార్ట్ కట్
@@ -55,6 +58,13 @@ y_test = y_data[split_index:]
 print("Training the Multi-Linear AI Engine...")
 model = MyLinearRegression(learning_rate=0.001)
 model.fit(X_train, y_train, epochs=20000)
+
+# 5. The Actual Exam (Testing the model on unseen 20% data)
+y_test_pred = model.predict(X_test)
+
+# ప్రతి రికార్డ్ కి ఎంత తప్పు చేసిందో లెక్కించి, దాని ఆవరేజ్ తీయడం (MAE)
+test_error = np.mean(np.abs(y_test - y_test_pred))
+print(f"Test Exam Result: On average, the model's price prediction is off by ₹ {test_error:.2f}")
 
 print(f"Engine Trained! \nFound Weights: {model.weights} \nBase Fare (c): {model.c}")
 
