@@ -19,14 +19,14 @@ class MyLinearRegression:
         self.weights = np.zeros(n_features) # 3 features so 3 zeros to start with
         
         for _ in range(epochs):
-            # np.dot అనేది (w1*x1 + w2*x2 + w3*x3) ని ఒకేసారి చేసే మ్యాజిక్ షార్ట్ కట్
+            # np.dot (w1*x1 + w2*x2 + w3*x3) calculate at once for all samples
             y_pred = np.dot(X, self.weights) + self.c
             
-            # ఇవి డెరివేటివ్స్ (తప్పును కనిపెట్టే కొలతలు)
+            # calculating gradients (how much each weight is responsible for the error)
             D_w = (-2/n_samples) * np.dot(X.T, (y - y_pred))
             D_c = (-2/n_samples) * np.sum(y - y_pred)
             
-            # వెయిట్స్ ని అప్డేట్ చేయడం (తప్పు సరిదిద్దుకోవడం)
+            # updating weights (correcting the weights based on the error)
             self.weights = self.weights - (self.lr * D_w)
             self.c = self.c - (self.lr * D_c)
             
@@ -38,10 +38,10 @@ class MyLinearRegression:
 # ---------------------------------------------------------
 print("Loading data from tirupati_cab_data.csv...")
 
-# 1. డేటాని చదవడం
+# 1. Reading the CSV file into a DataFrame
 df = pd.read_csv("tirupati_cab_data.csv")
 
-# 2. X మరియు y ని విడగొట్టడం
+# 2. x (features) and y (target) data preparation
 X_data = df[['Distance_KM', 'Traffic_Level', 'Weather_Rainy']].values
 y_data = df['Cab_Price_INR'].values
 
@@ -79,7 +79,7 @@ def get_cab_price(distance, traffic, weather):
 # gr.Blocks వాడితే లేఅవుట్ మన కంట్రోల్ లో ఉంటుంది
 with gr.Blocks(theme=gr.themes.Soft()) as interface:
     gr.Markdown("# 🚖 Tirupati Cab Price Predictor")
-    gr.Markdown("### Core AI Engine: Multi-Linear Regression")
+    gr.Markdown("### Core AI Engine:")
     
     with gr.Row(): # ఈ మూడు పక్కపక్కన వస్తాయి
         dist_input = gr.Slider(minimum=1, maximum=50, value=5, label="Distance (in KM)")
